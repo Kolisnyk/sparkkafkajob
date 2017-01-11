@@ -1,8 +1,5 @@
-/**
- * Created by oleksii on 09.01.17.
- */
 
-
+        import com.fasterxml.jackson.databind.ObjectMapper;
         import org.apache.spark.SparkConf;
         import org.apache.spark.api.java.JavaRDD;
         import org.apache.spark.api.java.JavaSparkContext;
@@ -15,7 +12,7 @@
             public static void main(String[] args) throws IOException {
                 SparkConf sparkConf = new SparkConf()
                         .setAppName("Calculation")
-                        .setMaster("local[*]");//remove
+                        .setMaster("local[*]"); //remove in production
                 JavaSparkContext sparkContext = new JavaSparkContext(sparkConf);
                 JavaRDD<String> stringJavaRDD = sparkContext.textFile("/home/oleksii/bd/uservisits/");
 
@@ -30,9 +27,11 @@
                 for (int i = 0; i < 10; i++){
                     topTenCountries.add(list.get(i));
                 }
-                System.out.println(topTenCountries);
+
+                System.out.println(toJSON(topTenCountries));
             }
 
+            // sorting the Map
             private static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
                 return map.entrySet()
                         .stream()
@@ -44,7 +43,17 @@
                                 LinkedHashMap::new
                         ));
             }
-            /// kafka
 
+            // creating JSON
+            private static String toJSON (List<Map.Entry<String, Long>> topTenCountries){
+                String jsonString = "";
+                ObjectMapper mapperObj = new ObjectMapper();
+                try {
+                    jsonString = mapperObj.writeValueAsString(topTenCountries);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return jsonString;
+            }
 
         }
