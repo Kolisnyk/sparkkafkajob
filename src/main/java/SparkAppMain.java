@@ -1,4 +1,5 @@
 
+
         import com.fasterxml.jackson.databind.ObjectMapper;
         import org.apache.spark.SparkConf;
         import org.apache.spark.api.java.JavaRDD;
@@ -7,32 +8,34 @@
         import java.util.*;
         import java.util.stream.Collectors;
 
-
         public class SparkAppMain {
-            private static final String topic = "test";
-            private static String message;
+            public static final String topic = "test";
+            public static String message ="";
 
-            public static void main(String[] args) throws IOException {
+            public static void main(String[] args) {
                 SparkConf sparkConf = new SparkConf()
                         .setAppName("Calculation");
                 JavaSparkContext sparkContext = new JavaSparkContext(sparkConf);
-                JavaRDD<String> stringJavaRDD = sparkContext.textFile("/home/oleksii/bd/uservisits/");
+                try {
+                    JavaRDD<String> stringJavaRDD = sparkContext.textFile("/home/oleksii/bd/uservisits/");
+                    JavaRDD<String> countries = stringJavaRDD.map(s -> s.split(",")).map(r -> r[5]);
 
-                //JavaRDD<String> countries = stringJavaRDD.map(x -> x.substring(142, 144));
-                JavaRDD<String> countries = stringJavaRDD.map(s -> s.split(",")).map(r -> r[5]);
-                Map<String, Long> countriesCount = countries.countByValue();
-                Map<String, Long> sorted = sortByValue(countriesCount);
+                    Map<String, Long> countriesCount = countries.countByValue();
+                    Map<String, Long> sorted = sortByValue(countriesCount);
 
-                Set<Map.Entry<String, Long>> set = sorted.entrySet();
-                List<Map.Entry<String, Long>> list = new ArrayList<>(set);
-                List<Map.Entry<String, Long>> topTenCountries = new ArrayList<>();
-                for (int i = 0; i < 10; i++){
-                    topTenCountries.add(list.get(i));
-                }
+                    Set<Map.Entry<String, Long>> set = sorted.entrySet();
+                    List<Map.Entry<String, Long>> list = new ArrayList<>(set);
+                    List<Map.Entry<String, Long>> topTenCountries = new ArrayList<>();
+                    for (int i = 0; i < 10; i++) {
+                        topTenCountries.add(list.get(i));
+                    }
                 //kreating kafka producer
                 message = toJSON(topTenCountries);
-                KafkaConnection kc = new KafkaConnection();
-                kc.main(topic, message);
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+                KafkaConnection.streamKafka(topic, message);
                 System.out.println(message);
             }
 

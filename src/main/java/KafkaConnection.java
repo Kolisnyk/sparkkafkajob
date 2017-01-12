@@ -1,26 +1,43 @@
-/**
- * Created by oleksii on 11.01.17.
- */
 
-    import kafka.javaapi.producer.Producer;
-    import kafka.producer.KeyedMessage;
-    import kafka.producer.ProducerConfig;
+    import org.apache.kafka.clients.producer.KafkaProducer;
+    import org.apache.kafka.clients.producer.ProducerRecord;
 
     import java.util.Properties;
 
-    class KafkaConnection {
-        private static Producer<Integer, String> producer;
-        private final Properties properties = new Properties();
+    public class KafkaConnection {
 
-        KafkaConnection() {
-            properties.put("metadata.broker.list", "localhost:9092");
-            properties.put("serializer.class", "kafka.serializer.StringEncoder");
-            properties.put("request.required.acks", "1");
-            producer = new Producer<>(new ProducerConfig(properties));
+        public static Properties properties = new Properties();
+        public static KafkaProducer<String, String> producer;
+
+        public KafkaConnection() {
         }
 
-        static void main(String topic, String message) {
-            KeyedMessage<Integer, String> data = new KeyedMessage<>(topic, message);
+        public static void main(String[] args){
+        }
+
+        public static void streamKafka(String topic, String message) {
+
+            properties.put("metadata.broker.list", "localhost:9092");
+            properties.put("bootstrap.servers", "localhost:9092");
+            properties.put("acks", "all");
+            properties.put("retries", 0);
+            properties.put("batch.size", 16384);
+            properties.put("linger.ms", 1);
+            properties.put("buffer.memory", 33554432);
+            properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+            properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+
+            KafkaProducer<String, String> producer;
+            producer = new KafkaProducer<>(properties);
+
+            new KafkaConnection();
+            String topics = "";
+            String messages = "";
+            if (topic != null && messages != null){
+                topics = topic;
+                messages = message;
+            }
+            ProducerRecord<String, String> data = new ProducerRecord<>(topics, messages);
             producer.send(data);
             producer.close();
         }
