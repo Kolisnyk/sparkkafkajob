@@ -9,6 +9,9 @@
 
 
         public class SparkAppMain {
+            private static final String topic = "test";
+            private static String message;
+
             public static void main(String[] args) throws IOException {
                 SparkConf sparkConf = new SparkConf()
                         .setAppName("Calculation")
@@ -27,8 +30,11 @@
                 for (int i = 0; i < 10; i++){
                     topTenCountries.add(list.get(i));
                 }
-
-                System.out.println(toJSON(topTenCountries));
+                //kreating kafka producer
+                message = toJSON(topTenCountries);
+                KafkaConnection kc = new KafkaConnection();
+                kc.main(topic, message);
+                System.out.println(message);
             }
 
             // sorting the Map
