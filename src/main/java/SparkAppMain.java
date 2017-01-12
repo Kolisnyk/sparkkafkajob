@@ -14,8 +14,7 @@
 
             public static void main(String[] args) throws IOException {
                 SparkConf sparkConf = new SparkConf()
-                        .setAppName("Calculation")
-                        .setMaster("local[*]"); //remove in production
+                        .setAppName("Calculation");
                 JavaSparkContext sparkContext = new JavaSparkContext(sparkConf);
                 JavaRDD<String> stringJavaRDD = sparkContext.textFile("/home/oleksii/bd/uservisits/");
 
